@@ -1,0 +1,21 @@
+# Minimal local wrapper config derived from vendor/CLIProxyAPI/config.example.yaml.
+# The wrapper scripts will expand or rewrite this file as the project grows.
+
+host: ""
+port: 3000
+remote-management:
+  allow-remote: true
+  secret-key: "$2a$10$54/YBRwRFmWNphippv9Sz.3lfqnstjl5dDJWrjyxZLNukx8YBkIni"
+  disable-control-panel: false
+auth-dir: "~/.cli-proxy-api"
+api-keys:
+  - "change-me-local-gateway-key"
+debug: false
+usage-statistics-enabled: false
+request-retry: 2
+oauth-model-alias:
+  codex:
+    - name: "gpt-5.4"
+      alias: "gpt-5.4"
+    - name: "gpt-5-codex"
+      alias: "gpt-5-codex"

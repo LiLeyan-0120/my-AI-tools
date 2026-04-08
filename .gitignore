@@ -1,0 +1,4 @@
+.env
+.runtime/
+vendor/CLIProxyAPI/.env
+docs/plans/

@@ -1,0 +1,39 @@
+ARG GO_IMAGE=docker.m.daocloud.io/library/golang:1.26-alpine
+ARG RUNNER_IMAGE=docker.m.daocloud.io/library/alpine:3.22.0
+ARG GOPROXY=https://goproxy.cn,direct
+ARG GOSUMDB=sum.golang.google.cn
+
+FROM ${GO_IMAGE} AS builder
+
+WORKDIR /src
+
+ARG GOPROXY
+ARG GOSUMDB
+ENV GOPROXY=${GOPROXY}
+ENV GOSUMDB=${GOSUMDB}
+
+COPY vendor/CLIProxyAPI/go.mod vendor/CLIProxyAPI/go.sum ./
+RUN go mod download
+
+COPY vendor/CLIProxyAPI/ ./
+
+ARG VERSION=dev
+ARG COMMIT=none
+ARG BUILD_DATE=unknown
+
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'main.Version=${VERSION}' -X 'main.Commit=${COMMIT}' -X 'main.BuildDate=${BUILD_DATE}'" -o /out/CLIProxyAPI ./cmd/server/
+
+FROM ${RUNNER_IMAGE}
+
+RUN apk add --no-cache tzdata
+RUN mkdir /CLIProxyAPI
+
+COPY --from=builder /out/CLIProxyAPI /CLIProxyAPI/CLIProxyAPI
+COPY vendor/CLIProxyAPI/config.example.yaml /CLIProxyAPI/config.example.yaml
+
+WORKDIR /CLIProxyAPI
+
+ENV TZ=Asia/Shanghai
+RUN cp /usr/share/zoneinfo/${TZ} /etc/localtime && echo "${TZ}" > /etc/timezone
+
+CMD ["./CLIProxyAPI"]
